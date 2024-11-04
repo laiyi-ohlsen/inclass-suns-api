@@ -1,7 +1,15 @@
 import express from 'express'
 import fs from 'fs/promises'
+import cors from 'cors'
+import path from 'path';
+import { dirname } from 'path';
+
 
 const app = express(); 
+app.use(cors({
+    origin: '*'
+}));
+
 
 const port = process.env.PORT || 3001
 
@@ -15,6 +23,7 @@ const readJson = async () => {
     roster = jsonData.roster;
 }
 
+
 // calling the readJson function and then setting up our app to listen on our port 
 readJson().then(() => {
     app.listen(port, () => {
@@ -25,6 +34,7 @@ readJson().then(() => {
 app.get('/roster', (req, res) => {
     res.send(jsonData)
 })
+
 
 // set up endpoint for requests about age 
 app.get('/age', (req, res) => {
@@ -60,9 +70,10 @@ app.get('/yearsActive', (req, res) => {
 })
 // set up endpoint for a requesting a specific player 
 app.get('/player/:player', (req, res) => {
-
+   
     // getting the player that was requested 
-    const reqPlayer = req.params.player.substring(1);
+    const reqPlayer = req.params.player;
+    console.log(reqPlayer)
     //const roster = jsonData.roster; 
 
     roster.forEach((player,index) => {
@@ -72,5 +83,26 @@ app.get('/player/:player', (req, res) => {
             res.send(reqPlayerData)
         }
     })
+    
+})
+
+app.get('/images/:image', (req,res) => {
+    
+    const options = {
+        root: path.join(import.meta.dirname)
+    };
+
+    const fileName = `images/${req.params.image}`; 
+
+    res.sendFile(fileName, options, (err) => {
+        if (err) {
+            console.error('Error sending file:', err);
+            res.status(err.status).end(); // Close the response if there is an error
+        } else {
+            console.log(`Sent ${fileName}`);
+        }
+
+    })
+
     
 })
